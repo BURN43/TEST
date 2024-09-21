@@ -9,7 +9,7 @@ const SettingsPage = () => {
   const userId = user ? user._id : null; // Get userId from the user object
 
   useEffect(() => {
-    console.log('userId from AuthStore:', userId);
+    
   }, [userId]);
 
   const [albumTitle, setAlbumTitle] = useState('');
@@ -56,8 +56,14 @@ const SettingsPage = () => {
           const settingsData = response.data;
 
           setAlbumTitle(settingsData.albumTitle);
-          setEventDate(settingsData.eventDate);
-          setEventTime(settingsData.eventTime);
+
+          // Format the eventDate to "yyyy-MM-dd" for the input field
+          if (settingsData.eventDate) {
+            const formattedDate = new Date(settingsData.eventDate).toISOString().split('T')[0]; // Only keep the date part
+            setEventDate(formattedDate);
+          }
+
+          setEventTime(settingsData.eventTime); // You may need to format this similarly if needed
           setGreetingText(settingsData.greetingText);
           setGuestInfo(settingsData.guestInfo);
           setDisableGuestUploads(settingsData.disableGuestUploads);

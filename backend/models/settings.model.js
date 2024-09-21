@@ -7,7 +7,8 @@ const settingsSchema = new mongoose.Schema({
     ref: 'User',
   },
   albumTitle: { type: String, default: '' },
-  eventDate: { type: Date },
+  eventDate: { type: Date },  // Stores the event date
+  eventTime: { type: String, default: '' }, // Add this field to store event time
   greetingText: { type: String, default: '' },
   guestInfo: { type: String, default: '' },
   disableGuestUploads: { type: Boolean, default: false },
