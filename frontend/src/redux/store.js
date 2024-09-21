@@ -1,11 +1,18 @@
-// src/redux/store.js
-import { configureStore } from '@reduxjs/toolkit';
-import userIdReducer from './userIdSlice'; // Import the userId slice reducer
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { thunk } from 'redux-thunk'; // Use named import
+import { composeWithDevTools } from 'redux-devtools-extension';
+import userIdReducer from './reducers/userIdReducer'; // Make sure this reducer file exists
 
-const store = configureStore({
-  reducer: {
-    userId: userIdReducer,
-  },
+// Combine all reducers
+const rootReducer = combineReducers({
+  userId: userIdReducer,
+  // Add other reducers here when needed
 });
+
+// Create the store with middleware
+const store = createStore(
+  rootReducer,
+  composeWithDevTools(applyMiddleware(thunk)) // Apply Redux Thunk middleware for async actions
+);
 
 export default store;

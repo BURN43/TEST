@@ -10,6 +10,11 @@ const SettingsPage = () => {
   const { user } = useAuthStore();
   const userId = useSelector((state) => state.userId ? state.userId.toString() : null);
 
+useEffect(() => {
+  console.log('userId from Redux:', userId);
+}, [userId]);
+
+
 
   const [albumTitle, setAlbumTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
