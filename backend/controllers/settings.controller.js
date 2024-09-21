@@ -1,10 +1,9 @@
-// backend/controllers/settings.controller.js
 import Settings from '../models/settings.model.js';
 
 // Get settings for a specific user
 export const getSettings = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.params; // Use userId from req.params
     const settings = await Settings.findOne({ userId });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
@@ -18,11 +17,15 @@ export const getSettings = async (req, res) => {
 // Update settings for a specific user
 export const updateSettings = async (req, res) => {
   try {
-    console.log('Updated settings:', req.body);
-    const updatedSettings = await Settings.findOneAndUpdate({ userId: req.body.userId }, req.body, {
-      new: true,
-      upsert: true,
-    });
+    const { userId } = req.params; // Use userId from req.params
+    console.log('Updating settings for userId:', userId, 'with data:', req.body);
+
+    const updatedSettings = await Settings.findOneAndUpdate(
+      { userId },
+      req.body,
+      { new: true, upsert: true } // 'upsert: true' creates the document if it doesn't exist
+    );
+
     console.log('Updated settings document:', updatedSettings);
     res.status(200).json(updatedSettings);
   } catch (error) {
