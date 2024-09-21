@@ -38,7 +38,7 @@ const SettingsPage = () => {
 
     try {
       if (userId) {
-        const response = await axios.post(`/api/settings/${userId}`, settings);
+        const response = await axios.post(`http://localhost:5000/api/settings/${userId}`, settings);
         console.log('Response data:', response.data);
       } else {
         console.error('UserId is not available');
@@ -52,7 +52,7 @@ const SettingsPage = () => {
     const fetchSettings = async () => {
       try {
         if (userId) {
-          const response = await axios.get(`/api/settings/${userId}`);
+          const response = await axios.get(`http://localhost:5000/api/settings/${userId}`);
           const settingsData = response.data;
 
           setAlbumTitle(settingsData.albumTitle);
