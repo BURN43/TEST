@@ -1,4 +1,5 @@
-import Settings from '../models/settings.model.js';  // assuming you have a Settings model
+// backend/controllers/settings.controller.js
+import Settings from '../models/settings.model.js';
 
 // Get settings for a specific user
 export const getSettings = async (req, res) => {
@@ -17,12 +18,25 @@ export const getSettings = async (req, res) => {
 // Update settings for a specific user
 export const updateSettings = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const updatedSettings = await Settings.findOneAndUpdate({ userId }, req.body, {
-      new: true,  // Return the updated settings
-      upsert: true,  // Create the document if it doesn't exist
+    console.log('Updated settings:', req.body);
+    const updatedSettings = await Settings.findOneAndUpdate({ userId: req.body.userId }, req.body, {
+      new: true,
+      upsert: true,
     });
+    console.log('Updated settings document:', updatedSettings);
     res.status(200).json(updatedSettings);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete settings for a specific user
+export const deleteSettings = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await Settings.findOneAndDelete({ userId });
+    res.status(200).json({ message: 'Settings deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

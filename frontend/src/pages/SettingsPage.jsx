@@ -3,8 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
+import { useSelector } from 'react-redux';
 
 const SettingsPage = () => {
+  const { user } = useAuthStore();
+  const userId = useSelector((state) => state.userId ? state.userId.toString() : null);
+
+
   const [albumTitle, setAlbumTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
@@ -16,34 +22,54 @@ const SettingsPage = () => {
   const [disableDownloadOption, setDisableDownloadOption] = useState(false);
   const [countdown, setCountdown] = useState(null);
 
+  const handleSaveSettings = async () => {
+    const settings = {
+      albumTitle,
+      eventDate,
+      eventTime,
+      greetingText,
+      guestInfo,
+      disableGuestUploads,
+      hidePhotoChallenge,
+      hideLivestream,
+      disableDownloadOption,
+    };
 
-  // Fetch settings when the component mounts
+    try {
+      if (userId) { // Ensure userId is available
+        const response = await axios.post(`/api/settings/${userId}`, settings);
+        console.log('Response data:', response.data);
+      } else {
+        console.error('UserId is not available');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get('/api/settings'); // Adjust the URL based on your backend setup
-        if (res.data) {
-          setAlbumTitle(res.data.albumTitle || '');
-          setEventDate(res.data.eventDate || '');
-          setEventTime(res.data.eventTime || '');
-          setGreetingText(res.data.greetingText || '');
-          setGuestInfo(res.data.guestInfo || '');
-          setDisableGuestUploads(res.data.disableGuestUploads || false);
-          setHidePhotoChallenge(res.data.hidePhotoChallenge || false);
-          setHideLivestream(res.data.hideLivestream || false);
-          setDisableDownloadOption(res.data.disableDownloadOption || false);
-        }
-      } catch (err) {
-        console.error("Error fetching settings: ", err);
+        const response = await axios.get(`/api/settings/${userId}`);
+        const settingsData = response.data;
+
+        setAlbumTitle(settingsData.albumTitle);
+        setEventDate(settingsData.eventDate);
+        setEventTime(settingsData.eventTime);
+        setGreetingText(settingsData.greetingText);
+        setGuestInfo(settingsData.guestInfo);
+        setDisableGuestUploads(settingsData.disableGuestUploads);
+        setHidePhotoChallenge(settingsData.hidePhotoChallenge);
+        setHideLivestream(settingsData.hideLivestream);
+        setDisableDownloadOption(settingsData.disableDownloadOption);
+      } catch (error) {
+        console.error(error);
       }
     };
 
     fetchSettings();
-  }, []); // Empty dependency array ensures the effect runs only once
+  }, [userId]);
 
-
-
-  // Countdown logic (kept as it is)
   useEffect(() => {
     if (eventDate) {
       const interval = setInterval(() => {
@@ -68,32 +94,6 @@ const SettingsPage = () => {
       return () => clearInterval(interval);
     }
   }, [eventDate, eventTime]);
-
-
-  // Handle Save Settings function
-  const handleSaveSettings = async () => {
-    const settings = {
-      albumTitle,
-      eventDate,
-      eventTime,
-      greetingText,
-      guestInfo,
-      disableGuestUploads,
-      hidePhotoChallenge,
-      hideLivestream,
-      disableDownloadOption,
-    };
-
-    try {
-      const res = await axios.post('/api/settings', settings);
-      console.log('Settings saved successfully:', res.data);
-    } catch (err) {
-      console.error('Error saving settings:', err);
-    }
-  };
-
-
-
 
   return (
     <Layout>
@@ -121,7 +121,7 @@ const SettingsPage = () => {
             <label className="block text-gray-400 text-sm mb-2">Title</label>
             <input
               type="text"
-              value={albumTitle}
+              value={albumTitle || ''}
               onChange={(e) => setAlbumTitle(e.target.value)}
               className="w-full py-3 px-4 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Enter album title"
@@ -132,7 +132,7 @@ const SettingsPage = () => {
             <label className="block text-gray-400 text-sm mb-2">Event Date</label>
             <input
               type="date"
-              value={eventDate}
+              value={eventDate || ''}
               onChange={(e) => setEventDate(e.target.value)}
               className="w-full py-3 px-4 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
             />
@@ -142,7 +142,7 @@ const SettingsPage = () => {
             <label className="block text-gray-400 text-sm mb-2">Event Time (optional)</label>
             <input
               type="time"
-              value={eventTime}
+              value={eventTime || ''}
               onChange={(e) => setEventTime(e.target.value)}
               className="w-full py-3 px-4 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
             />
@@ -161,7 +161,7 @@ const SettingsPage = () => {
           <div className="mb-6">
             <label className="block text-gray-400 text-sm mb-2">Greeting Text</label>
             <textarea
-              value={greetingText}
+              value={greetingText || ''}
               onChange={(e) => setGreetingText(e.target.value)}
               className="w-full py-3 px-4 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Enter a greeting text for your guests"
@@ -217,7 +217,7 @@ const SettingsPage = () => {
         <div className="text-center mt-8">
           <button
             onClick={handleSaveSettings}
-            className="py-3 px-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-blue-600 hover:to-purple-700 transition duration-300"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             Save Settings
           </button>

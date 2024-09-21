@@ -16,6 +16,8 @@ import AlbumPage from './pages/AlbumPage';
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/authStore";
 import { useEffect } from "react";
+import { Provider } from 'react-redux'; // Import Redux Provider
+import store from './redux/store'; // Import the Redux store
 
 // protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
@@ -51,110 +53,106 @@ function App() {
 		checkAuth();
 	}, [checkAuth]);
 
-	
-
 	return (
-		<div
-			className='min-h-screen bg-gradient-to-br
-    from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center relative overflow-hidden'
-		>
-			<FloatingShape color='bg-purple-500' size='w-64 h-64' top='-5%' left='10%' delay={0} />
-			<FloatingShape color='bg-blue-500' size='w-48 h-48' top='70%' left='80%' delay={5} />
-			<FloatingShape color='bg-purple-500' size='w-32 h-32' top='40%' left='-10%' delay={2} />
+		<Provider store={store}> 
+			<div
+				className='min-h-screen bg-gradient-to-br
+		from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center relative overflow-hidden'
+			>
+				<FloatingShape color='bg-purple-500' size='w-64 h-64' top='-5%' left='10%' delay={0} />
+				<FloatingShape color='bg-blue-500' size='w-48 h-48' top='70%' left='80%' delay={5} />
+				<FloatingShape color='bg-purple-500' size='w-32 h-32' top='40%' left='-10%' delay={2} />
 
-			<Routes>
+				<Routes>
+					<Route
+						path='/'
+						element={
+							<ProtectedRoute>
+								<DashboardPage />
+							</ProtectedRoute>
+						}
+					/>			
+					<Route
+						path='/settings'
+						element={
+						<ProtectedRoute>
+							<SettingsPage />  
+						</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='/album'
+						element={
+							<ProtectedRoute>
+								<AlbumPage/>
+							</ProtectedRoute>
+						}
+					/>	
+					<Route
+						path='/photo-challenge'
+						element={
+							<ProtectedRoute>
+								<PhotoChallengePage />
+							</ProtectedRoute>
+						}
+					/>		
+					<Route
+						path='/guest-challange'
+						element={
+							<ProtectedRoute>
+								<GuestChallengeView />
+							</ProtectedRoute>
+						}
+					/>	
+					<Route
+						path='/design-table-stand'
+						element={
+							<ProtectedRoute>
+								<DesignTableStandPage />
+							</ProtectedRoute>
+						}
+					/>						
+					<Route
+						path='/signup'
+						element={
+							<RedirectAuthenticatedUser>
+								<SignUpPage />
+							</RedirectAuthenticatedUser>
+						}
+					/>
+					<Route
+						path='/login'
+						element={
+							<RedirectAuthenticatedUser>
+								<LoginPage />
+							</RedirectAuthenticatedUser>
+						}
+					/>
+					<Route path='/verify-email' element={<EmailVerificationPage />} />
 
-				
-				<Route
-					path='/'
-					element={
-						<ProtectedRoute>
-							<DashboardPage />
-						</ProtectedRoute>
-					}
-				/>			
-				<Route
-					path='/settings'
-					element={
-					<ProtectedRoute>
-						<SettingsPage />  
-					</ProtectedRoute>
-					}
-				/>
-				<Route
-					path='/album'
-					element={
-						<ProtectedRoute>
-							<AlbumPage/>
-						</ProtectedRoute>
-					}
-				/>	
-				<Route
-					path='/photo-challenge'
-					element={
-						<ProtectedRoute>
-							<PhotoChallengePage />
-						</ProtectedRoute>
-					}
-				/>		
-				<Route
-					path='/guest-challange'
-					element={
-						<ProtectedRoute>
-							<GuestChallengeView />
-						</ProtectedRoute>
-					}
-				/>	
-				<Route
-					path='/design-table-stand'
-					element={
-						<ProtectedRoute>
-							<DesignTableStandPage />
-						</ProtectedRoute>
-					}
-				/>						
-				<Route
-					path='/signup'
-					element={
-						<RedirectAuthenticatedUser>
-							<SignUpPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route
-					path='/login'
-					element={
-						<RedirectAuthenticatedUser>
-							<LoginPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				<Route path='/verify-email' element={<EmailVerificationPage />} />
+					<Route
+						path='/forgot-password'
+						element={
+							<RedirectAuthenticatedUser>
+								<ForgotPasswordPage />
+							</RedirectAuthenticatedUser>
+						}
+					/>
 
-				<Route
-					path='/forgot-password'
-					element={
-						<RedirectAuthenticatedUser>
-							<ForgotPasswordPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-
-				<Route
-					path='/reset-password/:token'
-					element={
-						<RedirectAuthenticatedUser>
-							<ResetPasswordPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				{/* catch all routes */}
-				<Route path='*' element={<Navigate to='/' replace />} />
-
-				
-			</Routes>
-			<Toaster />
-		</div>
+					<Route
+						path='/reset-password/:token'
+						element={
+							<RedirectAuthenticatedUser>
+								<ResetPasswordPage />
+							</RedirectAuthenticatedUser>
+						}
+					/>
+					{/* catch all routes */}
+					<Route path='*' element={<Navigate to='/' replace />} />
+				</Routes>
+				<Toaster />
+			</div>
+		</Provider> 
 	);
 }
 
