@@ -1,20 +1,16 @@
-// src/pages/SettingsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
-import { useSelector } from 'react-redux';
 
 const SettingsPage = () => {
-  const { user } = useAuthStore();
-  const userId = useSelector((state) => state.userId ? state.userId.toString() : null);
+  const { user } = useAuthStore(); // Fetch user from authStore
+  const userId = user ? user._id : null; // Get userId from the user object
 
-useEffect(() => {
-  console.log('userId from Redux:', userId);
-}, [userId]);
-
-
+  useEffect(() => {
+    console.log('userId from AuthStore:', userId);
+  }, [userId]);
 
   const [albumTitle, setAlbumTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -41,7 +37,7 @@ useEffect(() => {
     };
 
     try {
-      if (userId) { // Ensure userId is available
+      if (userId) {
         const response = await axios.post(`/api/settings/${userId}`, settings);
         console.log('Response data:', response.data);
       } else {
@@ -55,18 +51,20 @@ useEffect(() => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get(`/api/settings/${userId}`);
-        const settingsData = response.data;
+        if (userId) {
+          const response = await axios.get(`/api/settings/${userId}`);
+          const settingsData = response.data;
 
-        setAlbumTitle(settingsData.albumTitle);
-        setEventDate(settingsData.eventDate);
-        setEventTime(settingsData.eventTime);
-        setGreetingText(settingsData.greetingText);
-        setGuestInfo(settingsData.guestInfo);
-        setDisableGuestUploads(settingsData.disableGuestUploads);
-        setHidePhotoChallenge(settingsData.hidePhotoChallenge);
-        setHideLivestream(settingsData.hideLivestream);
-        setDisableDownloadOption(settingsData.disableDownloadOption);
+          setAlbumTitle(settingsData.albumTitle);
+          setEventDate(settingsData.eventDate);
+          setEventTime(settingsData.eventTime);
+          setGreetingText(settingsData.greetingText);
+          setGuestInfo(settingsData.guestInfo);
+          setDisableGuestUploads(settingsData.disableGuestUploads);
+          setHidePhotoChallenge(settingsData.hidePhotoChallenge);
+          setHideLivestream(settingsData.hideLivestream);
+          setDisableDownloadOption(settingsData.disableDownloadOption);
+        }
       } catch (error) {
         console.error(error);
       }
