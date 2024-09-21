@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
+import axios from 'axios';
 
 const SettingsPage = () => {
   const [albumTitle, setAlbumTitle] = useState('');
@@ -13,9 +14,36 @@ const SettingsPage = () => {
   const [hidePhotoChallenge, setHidePhotoChallenge] = useState(false);
   const [hideLivestream, setHideLivestream] = useState(false);
   const [disableDownloadOption, setDisableDownloadOption] = useState(false);
-
   const [countdown, setCountdown] = useState(null);
 
+
+  // Fetch settings when the component mounts
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get('/api/settings'); // Adjust the URL based on your backend setup
+        if (res.data) {
+          setAlbumTitle(res.data.albumTitle || '');
+          setEventDate(res.data.eventDate || '');
+          setEventTime(res.data.eventTime || '');
+          setGreetingText(res.data.greetingText || '');
+          setGuestInfo(res.data.guestInfo || '');
+          setDisableGuestUploads(res.data.disableGuestUploads || false);
+          setHidePhotoChallenge(res.data.hidePhotoChallenge || false);
+          setHideLivestream(res.data.hideLivestream || false);
+          setDisableDownloadOption(res.data.disableDownloadOption || false);
+        }
+      } catch (err) {
+        console.error("Error fetching settings: ", err);
+      }
+    };
+
+    fetchSettings();
+  }, []); // Empty dependency array ensures the effect runs only once
+
+
+
+  // Countdown logic (kept as it is)
   useEffect(() => {
     if (eventDate) {
       const interval = setInterval(() => {
@@ -41,8 +69,10 @@ const SettingsPage = () => {
     }
   }, [eventDate, eventTime]);
 
-  const handleSaveSettings = () => {
-    console.log({
+
+  // Handle Save Settings function
+  const handleSaveSettings = async () => {
+    const settings = {
       albumTitle,
       eventDate,
       eventTime,
@@ -52,8 +82,18 @@ const SettingsPage = () => {
       hidePhotoChallenge,
       hideLivestream,
       disableDownloadOption,
-    });
+    };
+
+    try {
+      const res = await axios.post('/api/settings', settings);
+      console.log('Settings saved successfully:', res.data);
+    } catch (err) {
+      console.error('Error saving settings:', err);
+    }
   };
+
+
+
 
   return (
     <Layout>
