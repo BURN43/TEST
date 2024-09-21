@@ -15,8 +15,7 @@ const spinnerStyles = {
 
 const AlbumPage = () => {
   const [photos, setPhotos] = useState([
-    { id: 1, url: 'https://d2m3d02laxv2t.cloudfront.net/bf3d3b05-4aed-46f0-b18f-b856371bf847/assets/img/demo_images/preset5thumbnail.png', title: 'Photo 1', likes: 0, liked: false, comments: [] },
-    { id: 2, url: 'https://d2m3d02laxv2t.cloudfront.net/bf3d3b05-4aed-46f0-b18f-b856371bf847/assets/img/demo_images/preset4thumbnail.png', title: 'Photo 2', likes: 0, liked: false, comments: [] },
+   
   ]);
 
   const [loading, setLoading] = useState(false); // Ladezustand
