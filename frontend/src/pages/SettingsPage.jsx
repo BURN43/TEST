@@ -76,6 +76,8 @@ const SettingsPage = () => {
       }
     };
 
+    
+
     fetchSettings();
   }, [userId]);
 
