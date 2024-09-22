@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
   });
 app.use("/api/auth", authRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use('/uploads', express.static('uploads'));
 
 
 

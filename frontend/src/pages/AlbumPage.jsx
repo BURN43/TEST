@@ -3,12 +3,12 @@ import { useAuthStore } from '../store/authStore';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import { FaTrashAlt, FaDownload, FaPlus, FaEdit, FaTimes, FaHeart, FaCommentDots, FaEllipsisH, FaArrowLeft } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 
 // Spinner CSS
 const spinnerStyles = {
-  border: '4px solid rgba(255, 255, 255, 0.3)', // Light border
-  borderLeftColor: '#ffffff', // White spinner
+  border: '4px solid rgba(255, 255, 255, 0.3)', 
+  borderLeftColor: '#ffffff',
   borderRadius: '50%',
   width: '40px',
   height: '40px',
@@ -18,18 +18,16 @@ const spinnerStyles = {
 const AlbumPage = ({ isGuest }) => {
   const { user } = useAuthStore();
   const userId = user ? user._id : null;
-  const isAdmin = user && user.role === 'admin'; // Überprüfen, ob der Benutzer Admin ist
+  const isAdmin = user && user.role === 'admin';
 
   const [title, setTitle] = useState('');
   const [greetingText, setGreetingText] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [eventTime, setEventTime] = useState('');
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
 
-  // Fetch album settings including title, greeting, event date, and time
   useEffect(() => {
+    // Fetch album settings including title and greeting
     const fetchAlbumSettings = async () => {
       try {
         if (userId) {
@@ -38,14 +36,6 @@ const AlbumPage = ({ isGuest }) => {
 
           setTitle(settingsData.albumTitle || '');
           setGreetingText(settingsData.greetingText || '');
-
-          if (settingsData.eventDate) {
-            const formattedDate = new Date(settingsData.eventDate).toISOString().slice(0, 10);
-            setEventDate(formattedDate);
-          }
-          if (settingsData.eventTime) {
-            setEventTime(settingsData.eventTime);
-          }
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -57,28 +47,75 @@ const AlbumPage = ({ isGuest }) => {
 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
+  
+    // Client-side validation
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (file && !validTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a JPEG or PNG image.');
+      return;
+    }
+    if (file && file.size > 10 * 1024 * 1024) {
+      alert('File is too large. Maximum size is 10MB.');
+      return;
+    }
+  
+    // Proceed with upload if validation passes
     if (file) {
-      setProfilePic(URL.createObjectURL(file));
-      // Hier kannst du den Code zum Speichern des Profilbilds auf dem Server hinzufügen
+      const formData = new FormData();
+      formData.append('profilePic', file);
+  
+      // Upload the file
+      axios.post('http://localhost:5000/api/upload/profile', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then(response => {
+        setProfilePic(response.data.profilePicUrl);
+      })
+      .catch(error => {
+        console.error('Error uploading profile picture:', error);
+      });
     }
   };
-
+  
   const handleAddPhoto = (e) => {
     const file = e.target.files[0];
+  
+    // Client-side validation for album pictures
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (file && !validTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a JPEG or PNG image.');
+      return;
+    }
+    if (file && file.size > 10 * 1024 * 1024) {
+      alert('File is too large. Maximum size is 10MB.');
+      return;
+    }
+  
+    // Proceed with upload if validation passes
     if (file) {
+      const formData = new FormData();
+      formData.append('albumPic', file);
+  
       setLoading(true);
-      const newId = photos.length + 1;
-      const newPhoto = {
-        id: newId,
-        url: URL.createObjectURL(file),
-        title: `Photo ${newId}`,
-      };
-      setTimeout(() => {
+      axios.post('http://localhost:5000/api/upload/album', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then(response => {
+        const newPhoto = {
+          id: photos.length + 1,
+          url: response.data.albumPicUrl,
+          title: `Photo ${photos.length + 1}`,
+        };
         setPhotos([newPhoto, ...photos]);
         setLoading(false);
-      }, 2000);
+      })
+      .catch(error => {
+        console.error('Error uploading album picture:', error);
+        setLoading(false);
+      });
     }
   };
+  
 
   return (
     <Layout>
@@ -88,7 +125,7 @@ const AlbumPage = ({ isGuest }) => {
         transition={{ duration: 0.5 }}
         className="p-4 md:p-8 pb-20"
       >
-        {/* Profilbild, Titel und Greeting Text */}
+        {/* Profile Picture, Title, and Greeting Text */}
         <div className="text-center max-w-2xl mx-auto mb-8 mt-10">
           <div className="relative w-32 h-32 mx-auto mb-6">
             {profilePic ? (
@@ -114,14 +151,11 @@ const AlbumPage = ({ isGuest }) => {
           <h1 className="text-4xl font-extrabold mb-2 text-gradient bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text uppercase">
             {title ? title : ''}
           </h1>
-          <p className="text-lg text-purple-400">
-            {greetingText ? greetingText : 'Willkommen zu unserem Event!'}
-          </p>
+          <p className="text-lg text-purple-400">{greetingText}</p>
         </div>
 
-        {/* Grid Layout für Bilder */}
+        {/* Grid Layout for Album Pictures */}
         <div className="grid grid-cols-3 gap-1 md:grid-cols-6 h-fit">
-          {/* Foto hinzufügen Tile */}
           <label className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600">
             <input
               type="file"
@@ -139,7 +173,6 @@ const AlbumPage = ({ isGuest }) => {
             )}
           </label>
 
-          {/* Vorhandene Bilder */}
           {photos.length > 0 ? (
             photos.map((photo) => (
               <motion.div
