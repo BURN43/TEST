@@ -5,11 +5,15 @@ import path from 'path';
 
 const router = express.Router();
 
-// File filter to validate image types
+// File filter to validate image and video types
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  const allowedTypes = [
+    'image/jpeg', 'image/jpg', 'image/png',   // Image types
+    'video/mp4', 'video/webm', 'video/avi',   // Video types
+  ];
+
   if (!allowedTypes.includes(file.mimetype)) {
-    const error = new Error('Invalid file type. Only JPEG, JPG, and PNG are allowed.');
+    const error = new Error('Invalid file type. Only JPEG, PNG, MP4, WebM, and AVI are allowed.');
     error.status = 400;
     return cb(error, false);
   }
@@ -19,7 +23,7 @@ const fileFilter = (req, file, cb) => {
 // Set up multer storage and file validation
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/');  // Adjust your file destination as needed
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -30,25 +34,19 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+  limits: { fileSize: 100 * 1024 * 1024 }, // Limit file size to 100MB
 });
 
-// Route for uploading profile pictures
-router.post('/profile', upload.single('profilePic'), (req, res) => {
+// Route for uploading videos
+router.post('/video', upload.single('videoFile'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded or invalid file type' });
   }
-  const profilePicUrl = `/uploads/${req.file.filename}`;
-  res.status(200).json({ profilePicUrl });
+  const videoUrl = `/uploads/${req.file.filename}`;
+  res.status(200).json({ videoUrl });
 });
 
-// Route for uploading album pictures
-router.post('/album', upload.single('albumPic'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded or invalid file type' });
-  }
-  const albumPicUrl = `/uploads/${req.file.filename}`;
-  res.status(200).json({ albumPicUrl });
-});
+// Other routes for images or profile pictures
+// ...
 
 export default router;
