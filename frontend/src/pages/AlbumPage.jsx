@@ -18,38 +18,42 @@ const spinnerStyles = {
 const AlbumPage = () => {
   const { user } = useAuthStore();
   const userId = user ? user._id : null;
-  const [title, setTitle] = useState(''); // Album title from settings
+
+  const [title, setTitle] = useState('');
+  const [greetingText, setGreetingText] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(false); // Ladezustand
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
-  const [greetingText, setGreetingText] = useState('Willkommen auf meiner Hochzeit!');
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [showOptions, setShowOptions] = useState(false); // For "Mehr Optionen"
 
-  // Funktion, um den Albumtitel von der API zu laden
-  useEffect(() => {
-    const fetchAlbumTitle = async () => {
-      try {
-        if (userId) {
-          const response = await axios.get(`http://localhost:5000/api/settings/${userId}`);
-          const settingsData = response.data;
 
-          // Den Albumtitel setzen, wenn er existiert
-          if (settingsData.albumTitle) {
-            setTitle(settingsData.albumTitle);
+    // Fetch album settings including title, greeting, event date, and time
+    useEffect(() => {
+      const fetchAlbumSettings = async () => {
+        try {
+          if (userId) {
+            const response = await axios.get(`http://localhost:5000/api/settings/${userId}`);
+            const settingsData = response.data;
+            
+            setTitle(settingsData.albumTitle || '');
+            setGreetingText(settingsData.greetingText || '');
+
+            if (settingsData.eventDate) {
+              const formattedDate = new Date(settingsData.eventDate).toISOString().slice(0, 10);
+              setEventDate(formattedDate);
+            }
+            if (settingsData.eventTime) {
+              setEventTime(settingsData.eventTime);
+            }
           }
-          if (settingsData.greetingText) {
-            setGreetingText(settingsData.greetingText);
-          }
+        } catch (error) {
+          console.error('Error fetching settings:', error);
         }
-      } catch (error) {
-        console.error('Fehler beim Laden des Albumtitels:', error);
-      }
-    };
+      };
 
-    fetchAlbumTitle();
-  }, [userId]); // Der useEffect-Hook wird ausgeführt, wenn sich die userId ändert
+      fetchAlbumSettings();
+    }, [userId]);
 
   const openModal = (photo) => {
     setSelectedPhoto(photo);
@@ -132,7 +136,8 @@ const AlbumPage = () => {
           <h1 className="text-4xl font-extrabold mb-2 text-gradient bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text uppercase">
             {title ? title : ''}
           </h1>
-          <p className="text-lg text-purple-400">{greetingText}</p>
+          <p className="text-lg text-purple-400">  {greetingText ? greetingText : 'Willkommen zu unserem Event!'}
+          </p>
         </div>
 
         {/* Restlicher Code */}
