@@ -15,6 +15,7 @@ const settingsSchema = new mongoose.Schema({
   hidePhotoChallenge: { type: Boolean, default: false },
   hideLivestream: { type: Boolean, default: false },
   disableDownloadOption: { type: Boolean, default: false },
+
 }, { timestamps: true });
 
 const Settings = mongoose.model('Settings', settingsSchema);
