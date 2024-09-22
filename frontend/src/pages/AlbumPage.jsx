@@ -15,7 +15,7 @@ const spinnerStyles = {
   animation: 'spin 1s linear infinite',
 };
 
-const AlbumPage = () => {
+const AlbumPage = ({ isGuest }) => {
   const { user } = useAuthStore();
   const userId = user ? user._id : null;
 

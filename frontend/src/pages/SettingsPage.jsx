@@ -8,6 +8,11 @@ const SettingsPage = () => {
   const { user } = useAuthStore(); // Fetch user from authStore
   const userId = user ? user._id : null; // Get userId from the user object
 
+  // Check if the user is not an admin
+  if (!user || user.role !== 'admin') {
+    return <Redirect to="/unauthorized" />; // Redirect to an unauthorized page
+  }
+
   useEffect(() => {
     
   }, [userId]);
