@@ -8,7 +8,8 @@ import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
 import settingsRoutes from './routes/settings.route.js';
 import uploadRoute from './routes/upload.route.js'; 
-
+import albumMediaRoutes from './routes/albumMedia.route.js';
+import profilePictureRoutes from './routes/profilePicture.route.js';
 
 
 dotenv.config();
@@ -33,7 +34,8 @@ app.use('/uploads', express.static('uploads'));
 // Use the upload route
 app.use('/api', uploadRoute);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
- 
+app.use('/api/album-media', albumMediaRoutes);
+app.use('/api/profile-picture', profilePictureRoutes);
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
