@@ -5,9 +5,10 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 import { connectDB } from "./db/connectDB.js";
-
 import authRoutes from "./routes/auth.route.js";
 import settingsRoutes from './routes/settings.route.js';
+import uploadRoute from './routes/upload.route.js'; 
+
 
 
 dotenv.config();
@@ -26,10 +27,13 @@ app.get('/', (req, res) => {
   });
 app.use("/api/auth", authRoutes);
 app.use("/api/settings", settingsRoutes);
+// Serve static files from the uploads directory
 app.use('/uploads', express.static('uploads'));
 
-
-
+// Use the upload route
+app.use('/api', uploadRoute);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
+ 
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));

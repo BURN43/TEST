@@ -1,3 +1,4 @@
+// backend/middelware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model.js';
 

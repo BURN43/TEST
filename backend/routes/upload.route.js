@@ -1,52 +1,55 @@
-// backend/routes/upload.route.js
 import express from 'express';
-import multer from 'multer';
-import path from 'path';
+import fileUpload from 'express-fileupload';
 
 const router = express.Router();
 
-// File filter to validate image and video types
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    'image/jpeg', 'image/jpg', 'image/png',   // Image types
-    'video/mp4', 'video/webm', 'video/avi',   // Video types
-  ];
+// Use fileUpload middleware
+router.use(fileUpload());
 
-  if (!allowedTypes.includes(file.mimetype)) {
-    const error = new Error('Invalid file type. Only JPEG, PNG, MP4, WebM, and AVI are allowed.');
-    error.status = 400;
-    return cb(error, false);
+// Route for profile picture upload
+router.post('/upload-profile-pic', async (req, res) => {
+  try {
+    if (!req.files || !req.files.profilePic) {
+      return res.status(400).send('No profile picture uploaded.');
+    }
+
+    const profilePic = req.files.profilePic;
+    console.log('Profile picture received:', profilePic.name);
+
+    profilePic.mv(`./uploads/profiles/${profilePic.name}`, (err) => {
+      if (err) {
+        console.error('Error saving profile picture:', err);
+        return res.status(500).send('Failed to save the profile picture.');
+      }
+      res.send({ profilePicUrl: `/uploads/profiles/${profilePic.name}` });
+    });
+  } catch (error) {
+    console.error('Error during profile picture upload:', error);
+    res.status(500).send('Server error during profile picture upload.');
   }
-  cb(null, true);
-};
-
-// Set up multer storage and file validation
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');  // Adjust your file destination as needed
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}${ext}`);
-  },
 });
 
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 100 * 1024 * 1024 }, // Limit file size to 100MB
-});
+// Route for album media (images or videos) upload
+router.post('/upload-media', async (req, res) => {
+  try {
+    if (!req.files || !req.files.mediaFile) {
+      return res.status(400).send('No media file uploaded.');
+    }
 
-// Route for uploading videos
-router.post('/video', upload.single('videoFile'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded or invalid file type' });
+    const mediaFile = req.files.mediaFile;
+    console.log('Media file received:', mediaFile.name);
+
+    mediaFile.mv(`./uploads/media/${mediaFile.name}`, (err) => {
+      if (err) {
+        console.error('Error saving media file:', err);
+        return res.status(500).send('Failed to save the media file.');
+      }
+      res.send({ mediaUrl: `/uploads/media/${mediaFile.name}` });
+    });
+  } catch (error) {
+    console.error('Error during media upload:', error);
+    res.status(500).send('Server error during media upload.');
   }
-  const videoUrl = `/uploads/${req.file.filename}`;
-  res.status(200).json({ videoUrl });
 });
-
-// Other routes for images or profile pictures
-// ...
 
 export default router;
