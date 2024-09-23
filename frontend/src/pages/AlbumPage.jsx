@@ -27,26 +27,37 @@ const AlbumPage = ({ isGuest }) => {
   const [profilePic, setProfilePic] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Fetch album settings including title and greeting
+  // Fetch album settings, profile picture, and media on page load
   useEffect(() => {
-    const fetchAlbumSettings = async () => {
-      console.log('Fetching album settings...');
+    const fetchAlbumData = async () => {
       try {
         if (userId) {
-          const response = await axios.get(`http://localhost:5000/api/settings/${userId}`, {
-            withCredentials: true, // Make sure to send the token cookies
+          // Fetch album title and greeting text
+          const settingsResponse = await axios.get(`http://localhost:5000/api/settings/${userId}`, {
+            withCredentials: true,
           });
-          const settingsData = response.data;
-
+          const settingsData = settingsResponse.data;
           setTitle(settingsData.albumTitle || '');
           setGreetingText(settingsData.greetingText || '');
+
+          // Fetch profile picture
+          const profilePicResponse = await axios.get(`http://localhost:5000/api/profile-picture`, {
+            withCredentials: true,
+          });
+          setProfilePic(profilePicResponse.data.profilePicUrl);
+
+          // Fetch album media
+          const mediaResponse = await axios.get(`http://localhost:5000/api/album-media`, {
+            withCredentials: true,
+          });
+          setMedia(mediaResponse.data.media);
         }
       } catch (error) {
-        console.error('Error fetching settings:', error);
+        console.error('Error fetching album data:', error);
       }
     };
 
-    fetchAlbumSettings();
+    fetchAlbumData();
   }, [userId]);
 
   // Handle Profile Picture Upload
@@ -70,20 +81,20 @@ const AlbumPage = ({ isGuest }) => {
       const formData = new FormData();
       formData.append('profilePic', file);
   
-      axios.post('http://localhost:5000/api/upload-profile-pic', formData, {
+      axios.post('http://localhost:5000/api/profile-picture/upload-profile-pic', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       })
       .then(response => {
-        console.log('Profile picture upload response:', response.data); // Log response for debugging
+        console.log('Profile picture upload response:', response.data);
         
-        const baseURL = 'http://localhost:5000'; // Define the base URL
+        const baseURL = 'http://localhost:5000';
         const profilePicUrl = response.data.profilePicUrl.startsWith('/uploads/') 
           ? `${baseURL}${response.data.profilePicUrl}` 
           : response.data.profilePicUrl;
   
-        console.log('Full Profile Picture URL:', profilePicUrl); // Log the full URL for debugging
-        setProfilePic(profilePicUrl); // Set the full URL to the state
+        console.log('Full Profile Picture URL:', profilePicUrl);
+        setProfilePic(profilePicUrl);
       })
       .catch(error => {
         setErrorMessage('Error uploading profile picture.');
@@ -97,7 +108,6 @@ const AlbumPage = ({ isGuest }) => {
     const file = e.target.files[0];
     console.log('Media file selected:', file);
 
-    // Client-side validation for media (images and videos)
     const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     const validVideoTypes = ['video/mp4', 'video/webm', 'video/avi'];
 
@@ -112,22 +122,21 @@ const AlbumPage = ({ isGuest }) => {
 
     setErrorMessage(null);
 
-    // Proceed with media upload if validation passes
     if (file) {
       const formData = new FormData();
       formData.append('mediaFile', file);
 
       setLoading(true);
       console.log('Uploading media...');
-      axios.post('http://localhost:5000/api/upload-media', formData, {
+      axios.post('http://localhost:5000/api/album-media/upload-media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true, // Ensure to send the token cookies
+        withCredentials: true,
       })
       .then(response => {
-        console.log('Media upload response:', response.data); // Log response for debugging
+        console.log('Media upload response:', response.data);
         const newMedia = {
           id: media.length + 1,
-          url: response.data.mediaUrl,  // Check if URL is correct
+          url: response.data.mediaUrl,
           title: `Media ${media.length + 1}`,
         };
         setMedia([newMedia, ...media]);
@@ -142,44 +151,36 @@ const AlbumPage = ({ isGuest }) => {
   };
 
   // Render Media (Images/Videos)
-      const renderMedia = (mediaItem) => {
-        console.log('Rendering media item:', mediaItem); // Log the entire media item
-        
-        if (!mediaItem || !mediaItem.url) {
-          return <div className="text-red-500">Invalid media item</div>;  // Placeholder for invalid media
-        }
-      
-        // Ensure the URL is fully qualified by adding the base URL
-        const baseURL = 'http://localhost:5000';
-        const fullURL = mediaItem.url.startsWith('/uploads/') ? `${baseURL}${mediaItem.url}` : mediaItem.url;
-      
-        const isVideo = fullURL.endsWith('.mp4') || fullURL.endsWith('.webm') || fullURL.endsWith('.avi');
-      
-        if (isVideo) {
-          return (
-            <video className="w-full h-full object-cover" controls>
-              <source src={fullURL} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          );
-        }
-      
-        // Log the fully qualified image URL for debugging
-        console.log('Full Image URL:', fullURL);
-      
-        // Render the image, focusing on the top
-        return (
-          <img
-            loading="lazy"
-            src={fullURL}
-            alt={mediaItem.title}
-            className="w-full h-full rounded-lg object-cover object-center" // Ensures image focuses on top and fits the square
-          />
-        );
-      };
+  const renderMedia = (mediaItem) => {
+    console.log('Rendering media item:', mediaItem);
+    
+    if (!mediaItem || !mediaItem.url) {
+      return <div className="text-red-500">Invalid media item</div>;
+    }
   
+    const baseURL = 'http://localhost:5000';
+    const fullURL = mediaItem.url.startsWith('/uploads/') ? `${baseURL}${mediaItem.url}` : mediaItem.url;
   
+    const isVideo = fullURL.endsWith('.mp4') || fullURL.endsWith('.webm') || fullURL.endsWith('.avi');
   
+    if (isVideo) {
+      return (
+        <video className="w-full h-full object-cover" controls>
+          <source src={fullURL} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+  
+    return (
+      <img
+        loading="lazy"
+        src={fullURL}
+        alt={mediaItem.title}
+        className="w-full h-full rounded-lg object-cover object-center"
+      />
+    );
+  };
 
   return (
     <Layout>
@@ -191,27 +192,27 @@ const AlbumPage = ({ isGuest }) => {
       >
         {/* Profile Picture, Title, and Greeting Text */}
         <div className="text-center max-w-2xl mx-auto mb-8 mt-10">
-        <div className="relative w-40 h-40 mx-auto mb-6"> {/* Bigger size */}
-        {profilePic ? (
-          <img
-            src={profilePic}
-            className="w-full h-full rounded-full object-cover object-top border-4 border-white" // Focus image on top
-            alt="Profile"
-          />
-        ) : (
-          isAdmin && (
-            <label className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-full border-2 border-dashed border-purple-600">
-              <input
-                type="file"
-                className="absolute z-10 w-full h-full opacity-0 cursor-pointer"
-                onChange={handleProfilePicChange}
+          <div className="relative w-40 h-40 mx-auto mb-6">
+            {profilePic ? (
+              <img
+                src={profilePic}
+                className="w-full h-full rounded-full object-cover object-top border-4 border-white"
+                alt="Profile"
               />
-              <FaPlus className="text-3xl text-purple-600" />
-              <div className="mt-1 text-xs text-purple-600">Profilbild hinzufügen</div>
-            </label>
-          )
-        )}
-      </div>
+            ) : (
+              isAdmin && (
+                <label className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-full border-2 border-dashed border-purple-600">
+                  <input
+                    type="file"
+                    className="absolute z-10 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleProfilePicChange}
+                  />
+                  <FaPlus className="text-3xl text-purple-600" />
+                  <div className="mt-1 text-xs text-purple-600">Profilbild hinzufügen</div>
+                </label>
+              )
+            )}
+          </div>
 
           <h1 className="text-4xl font-extrabold mb-2 text-gradient bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text uppercase">
             {title ? title : ''}
@@ -227,9 +228,9 @@ const AlbumPage = ({ isGuest }) => {
         )}
 
         {/* Grid Layout for Media Upload (both images and videos) */}
-        <div className="grid grid-cols-3 gap-1 md:grid-cols-6  h-fit">
+        <div className="grid grid-cols-3 gap-1 md:grid-cols-6 h-fit">
           {/* Add Media (Images or Videos) */}
-        <label className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600">
+          <label className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600">
             <input
               type="file"
               accept="image/*,video/*"
