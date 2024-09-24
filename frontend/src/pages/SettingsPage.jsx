@@ -22,10 +22,10 @@ const SettingsPage = () => {
   const [eventTime, setEventTime] = useState('');
   const [greetingText, setGreetingText] = useState('');
   const [guestInfo, setGuestInfo] = useState('');
-  const [disableGuestUploads, setDisableGuestUploads] = useState(false);
-  const [hidePhotoChallenge, setHidePhotoChallenge] = useState(false);
-  const [hideLivestream, setHideLivestream] = useState(false);
-  const [disableDownloadOption, setDisableDownloadOption] = useState(false);
+  const [GuestUploadsImage, setGuestUploadsImage] = useState(false);
+  const [GuestUploadsVideo, setGuestUploadsVideo] = useState(false);
+  const [Guestcomments, setGuestcomments] = useState(false);
+  const [GuestDownloadOption, setGuestDownloadOption] = useState(false);
   const [countdown, setCountdown] = useState(null);
 
   const handleSaveSettings = async () => {
@@ -35,10 +35,10 @@ const SettingsPage = () => {
       eventTime,
       greetingText,
       guestInfo,
-      disableGuestUploads,
-      hidePhotoChallenge,
-      hideLivestream,
-      disableDownloadOption,
+      GuestUploadsImage,
+      GuestUploadsVideo,
+      Guestcomments,
+      GuestDownloadOption,
     };
 
     try {
@@ -71,10 +71,10 @@ const SettingsPage = () => {
           setEventTime(settingsData.eventTime); // You may need to format this similarly if needed
           setGreetingText(settingsData.greetingText);
           setGuestInfo(settingsData.guestInfo);
-          setDisableGuestUploads(settingsData.disableGuestUploads);
-          setHidePhotoChallenge(settingsData.hidePhotoChallenge);
-          setHideLivestream(settingsData.hideLivestream);
-          setDisableDownloadOption(settingsData.disableDownloadOption);
+          setGuestUploadsImage(settingsData.GuestUploadsImage);
+          setGuestUploadsVideo(settingsData.GuestUploadsVideo);
+          setGuestcomments(settingsData.Guestcomments);
+          setGuestDownloadOption(settingsData.GuestDownloadOption);
         }
       } catch (error) {
         console.error(error);
@@ -192,38 +192,38 @@ const SettingsPage = () => {
           <h2 className="text-2xl text-gray-200 font-bold mb-6">Additional Album Settings</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-gray-300">Disable guest photo uploads</span>
+              <span className="text-gray-300">Erlaube den Hochladen von Bildern</span>
               <input
                 type="checkbox"
-                checked={disableGuestUploads}
-                onChange={() => setDisableGuestUploads(!disableGuestUploads)}
+                checked={GuestUploadsImage}
+                onChange={() => setGuestUploadsImage(!GuestUploadsImage)}
                 className="form-checkbox h-6 w-6 text-blue-500"
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-300">Hide Photo Challenge for guests</span>
+              <span className="text-gray-300">Erlaube das Hochladen von Videos</span>
               <input
                 type="checkbox"
-                checked={hidePhotoChallenge}
-                onChange={() => setHidePhotoChallenge(!hidePhotoChallenge)}
+                checked={GuestUploadsVideo}
+                onChange={() => setGuestUploadsVideo(!GuestUploadsVideo)}
                 className="form-checkbox h-6 w-6 text-blue-500"
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-300">Hide Livestream for guests</span>
+              <span className="text-gray-300">Erlaube die Kommentar Funktion</span>
               <input
                 type="checkbox"
-                checked={hideLivestream}
-                onChange={() => setHideLivestream(!hideLivestream)}
+                checked={Guestcomments}
+                onChange={() => setGuestcomments(!Guestcomments)}
                 className="form-checkbox h-6 w-6 text-blue-500"
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-300">Disable download option for guests</span>
+              <span className="text-gray-300">Erlaube den Download von Videos & Bildern</span>
               <input
                 type="checkbox"
-                checked={disableDownloadOption}
-                onChange={() => setDisableDownloadOption(!disableDownloadOption)}
+                checked={GuestDownloadOption}
+                onChange={() => setGuestDownloadOption(!GuestDownloadOption)}
                 className="form-checkbox h-6 w-6 text-blue-500"
               />
             </div>

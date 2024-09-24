@@ -11,10 +11,11 @@ const settingsSchema = new mongoose.Schema({
   eventTime: { type: String, default: '' }, // Add this field to store event time
   greetingText: { type: String, default: '' },
   guestInfo: { type: String, default: '' },
-  disableGuestUploads: { type: Boolean, default: false },
-  hidePhotoChallenge: { type: Boolean, default: false },
-  hideLivestream: { type: Boolean, default: false },
-  disableDownloadOption: { type: Boolean, default: false },
+  GuestUploadsImage: { type: Boolean, default: false },
+  GuestUploadsVideo: { type: Boolean, default: false },
+  Guestcomments: { type: Boolean, default: false },
+
+  GuestDownloadOption: { type: Boolean, default: false },
   profilePic: { type: String, default: '' }, // New field for profile picture URL
 
 }, { timestamps: true });
