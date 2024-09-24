@@ -144,6 +144,30 @@ const AlbumPage = ({ isGuest }) => {
     });
   };
   
+  const openModal = (photo) => {
+    setSelectedPhoto(photo);
+    setConfirmDelete(false);
+  };
+
+  const closeModal = () => {
+    setSelectedPhoto(null);
+    setShowOptions(false); // Ensure options are hidden when closing
+  };
+
+  const deletePhoto = (id) => {
+    setPhotos(photos.filter((photo) => photo.id !== id));
+    closeModal();
+  };
+
+  const downloadPhoto = (url) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'photo.jpg');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
 
   // Render Media (Images/Videos)
   const renderMedia = (mediaItem) => {
