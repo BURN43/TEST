@@ -2,23 +2,34 @@ import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import fileUpload from 'express-fileupload';
+import { v4 as uuidv4 } from 'uuid';
 import ProfilePicture from '../models/profilePicture.model.js'; // Assuming you have a model
-import { v4 as uuidv4 } from 'uuid'; // For generating unique file names
 
 const router = express.Router();
 router.use(fileUpload());
 
-router.post('/upload-profile-pic', async (req, res) => {
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'profiles');
+
+// Ensure the uploads directory exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+// Base URL for constructing the full profile picture URL
+const baseURL = process.env.BASE_URL || 'http://localhost:5000'; // Set BASE_URL in your .env file
+
+// Route to handle profile picture upload
+router.post('/profile', async (req, res) => {
   try {
-    if (!req.files || !req.files.profilePic) {
-      return res.status(400).send('No profile picture uploaded.');
+    // Check if a profile picture and userId are provided
+    if (!req.files || !req.files.profilePic || !req.body.userId) {
+      return res.status(400).send('No profile picture or user ID provided.');
     }
 
     const profilePic = req.files.profilePic;
     const userId = req.body.userId;
-    const baseURL = process.env.BASE_URL || 'http://localhost:5000'; // Base URL for your server
 
-    // Check if the file is an image
+    // Validate file type (only allow image types)
     const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validImageTypes.includes(profilePic.mimetype)) {
       return res.status(400).send('Invalid file type. Please upload an image.');
@@ -26,21 +37,17 @@ router.post('/upload-profile-pic', async (req, res) => {
 
     // Generate a unique file name
     const uniqueFileName = `${uuidv4()}-${profilePic.name}`;
-    const uploadPath = path.join(__dirname, '..', 'uploads', 'profiles', uniqueFileName);
+    const uploadPath = path.join(UPLOAD_DIR, uniqueFileName);
 
     // Find the current profile picture for the user
     const existingProfile = await ProfilePicture.findOne({ userId });
 
     // If an old profile picture exists, delete the file from the server
     if (existingProfile && existingProfile.profilePicUrl) {
-      const oldPicPath = path.join(process.cwd(), existingProfile.profilePicUrl.replace(baseURL, ''));
-      fs.unlink(oldPicPath, (err) => {
-        if (err) {
-          console.error('Error deleting old profile picture:', err);
-        } else {
-          console.log('Old profile picture deleted:', oldPicPath);
-        }
-      });
+      const oldPicPath = path.join(UPLOAD_DIR, path.basename(existingProfile.profilePicUrl));
+      if (fs.existsSync(oldPicPath)) {
+        fs.unlinkSync(oldPicPath); // Delete the old file
+      }
     }
 
     // Save the new profile picture on the server
@@ -63,7 +70,8 @@ router.post('/upload-profile-pic', async (req, res) => {
         await newProfile.save();
       }
 
-      res.send({ profilePicUrl });
+      // Return the new profile picture URL
+      res.json({ profilePicUrl });
     });
   } catch (error) {
     console.error('Error during profile picture upload:', error);
@@ -71,7 +79,8 @@ router.post('/upload-profile-pic', async (req, res) => {
   }
 });
 
-router.get('/:userId', async (req, res) => {
+// Route to fetch the current profile picture by userId
+router.get('/profile/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const profilePicture = await ProfilePicture.findOne({ userId });
@@ -86,5 +95,6 @@ router.get('/:userId', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
 
 export default router;

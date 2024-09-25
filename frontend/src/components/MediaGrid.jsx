@@ -12,7 +12,7 @@ const spinnerStyles = {
   animation: 'spin 1s linear infinite',
 };
 
-const MediaGrid = ({ media, handleFileUpload, openModal, loading, isAdmin, userId, albumId }) => {
+const MediaGrid = ({ media = [], handleFileUpload, openModal, loading, isAdmin, userId, albumId }) => {
   const [guestUploads, setGuestUploads] = useState({ image: false, video: false });
   const fileInputRef = useRef(null);
 
@@ -99,7 +99,11 @@ const MediaGrid = ({ media, handleFileUpload, openModal, loading, isAdmin, userI
       )}
 
       {/* Render Media Items */}
-      {media.map((mediaItem) => renderMedia(mediaItem))}
+      {media.length > 0 ? (
+        media.map((mediaItem) => renderMedia(mediaItem))
+      ) : (
+        <p className="col-span-3 md:col-span-6 text-center text-gray-500">No media available</p>
+      )}
     </div>
   );
 };

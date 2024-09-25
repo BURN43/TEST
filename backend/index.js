@@ -7,8 +7,7 @@ import path from "path";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
 import settingsRoutes from './routes/settings.route.js';
-
-import profilePictureRoutes from './routes/profilePicture.route.js';
+import profilePictureRouter from './routes/profilePicture.route.js';
 import albumMediaRoutes from './routes/albumMedia.route.js';
 
 
@@ -32,9 +31,10 @@ app.use("/api/settings", settingsRoutes);
 
 
 // Use the upload route
-app.use('/api/profile-picture', profilePictureRoutes);
+app.use('/api/user', profilePictureRouter);
 app.use('/api/album-media', albumMediaRoutes);
 app.use('/uploads', express.static('uploads'));
+
 
 
 
@@ -50,3 +50,4 @@ app.listen(PORT, () => {
 	connectDB();
 	console.log("Server is running on port: ", PORT);
 });
+
