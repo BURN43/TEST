@@ -24,9 +24,8 @@ const AlbumPage = ({ isGuest }) => {
   const [GuestUploadsImage, setGuestUploadsImage] = useState(false);
   const [GuestUploadsVideo, setGuestUploadsVideo] = useState(false);
 
-  useEffect(() => {
-    console.log("Loaded Album ID:", albumId);
-  }, [albumId]);
+
+
 
   // Fetch album settings, profile picture, and media on page load
   useEffect(() => {

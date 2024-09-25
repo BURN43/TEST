@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -28,7 +30,7 @@ const userSchema = new mongoose.Schema({
   lastLogin: Date,
   albumId: {
     type: String, // Change this to ObjectId if using a separate Album model
-    default: null, // Set default to null or generate a UUID if desired
+    default: uuidv4,  // Automatically generate a UUID when a user is created
   },
 }, { timestamps: true });
 

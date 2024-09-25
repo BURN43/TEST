@@ -44,7 +44,7 @@ const MediaGrid = ({ media = [], handleFileUpload, openModal, loading, isAdmin, 
 
     return (
       <motion.div
-        key={mediaItem._id || mediaItem.id}
+        key={mediaItem._id || mediaItem.id || mediaItem.mediaUrl}  // Ensure key is unique and stable
         className="relative w-full cursor-pointer aspect-square bg-gray-800 rounded-lg overflow-hidden"
         onClick={() => openModal(mediaItem)}
       >
@@ -84,7 +84,10 @@ const MediaGrid = ({ media = [], handleFileUpload, openModal, loading, isAdmin, 
     <div className="grid grid-cols-3 gap-1 md:grid-cols-6 h-fit">
       {/* Media Upload Section for Images and Videos */}
       {(isAdmin || guestUploads.image || guestUploads.video) && (
-        <div className="relative flex flex-col items-center justify-center w-full max-w-xs cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600 p-4" onClick={handleUploadClick}>
+        <div
+          className="relative flex flex-col items-center justify-center w-full max-w-xs cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600 p-4"
+          onClick={handleUploadClick}
+        >
           <input
             type="file"
             ref={fileInputRef}
@@ -102,7 +105,7 @@ const MediaGrid = ({ media = [], handleFileUpload, openModal, loading, isAdmin, 
       {media.length > 0 ? (
         media.map((mediaItem) => renderMedia(mediaItem))
       ) : (
-        <p className="col-span-3 md:col-span-6 text-center text-gray-500"></p>
+        <p className="col-span-3 md:col-span-6 text-center text-gray-500">No media available</p>
       )}
     </div>
   );
