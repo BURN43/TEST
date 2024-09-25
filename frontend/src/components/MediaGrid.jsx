@@ -102,7 +102,7 @@ const MediaGrid = ({ media = [], handleFileUpload, openModal, loading, isAdmin, 
       {media.length > 0 ? (
         media.map((mediaItem) => renderMedia(mediaItem))
       ) : (
-        <p className="col-span-3 md:col-span-6 text-center text-gray-500">No media available</p>
+        <p className="col-span-3 md:col-span-6 text-center text-gray-500"></p>
       )}
     </div>
   );
