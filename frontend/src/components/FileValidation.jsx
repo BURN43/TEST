@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FileValidation = ({ handleFileUpload, maxImageSizeMB = 5, maxVideoSizeMB = 50 }) => {
+const FileValidation = ({ file, handleFileUpload, maxImageSizeMB = 5, maxVideoSizeMB = 50 }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const allowedFileTypes = [
@@ -30,18 +30,16 @@ const FileValidation = ({ handleFileUpload, maxImageSizeMB = 5, maxVideoSizeMB =
     return true;
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  React.useEffect(() => {
     if (file && validateFile(file)) {
       handleFileUpload(file);
     }
-  };
+  }, [file, handleFileUpload]);
 
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
+    <>
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-    </div>
+    </>
   );
 };
 

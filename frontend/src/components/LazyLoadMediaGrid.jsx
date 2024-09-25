@@ -1,36 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FaPlus } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import FileValidation from './FileValidation'; // Import FileValidation component
+import { FaPlus } from 'react-icons/fa';
+
+const spinnerStyles = {
+  border: '4px solid rgba(255, 255, 255, 0.3)',
+  borderLeftColor: '#ffffff',
+  borderRadius: '50%',
+  width: '40px',
+  height: '40px',
+  animation: 'spin 1s linear infinite',
+};
 
 const LazyLoadMediaGrid = ({ media, handleFileUpload, openModal, loading, loadMoreMedia, isAdmin, albumId, userId }) => {
   const [itemsToShow, setItemsToShow] = useState(12); // Initial media items to load
   const [isFetching, setIsFetching] = useState(false);
-  const [guestUploadsImage, setGuestUploadsImage] = useState(false);
-  const [guestUploadsVideo, setGuestUploadsVideo] = useState(false);
+  const [guestUploads, setGuestUploads] = useState({ image: false, video: false });
+  const fileInputRef = useRef(null); // Ref for file input
 
   // Fetch guest upload settings from backend
-// Fetch settings from backend
-useEffect(() => {
-  const fetchSettings = async () => {
-    try {
-      if (userId && albumId) { // Ensure both userId and albumId exist
-        const response = await axios.get(`http://localhost:5000/api/settings/${albumId}/${userId}`);
-        const settingsData = response.data;
-
-        // Set the state for guest uploads
-        setGuestUploadsImage(settingsData.GuestUploadsImage);
-        setGuestUploadsVideo(settingsData.GuestUploadsVideo);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        if (userId && albumId) {
+          const response = await axios.get(`http://localhost:5000/api/settings/${userId}`);
+          const settingsData = response.data;
+          setGuestUploads({
+            image: settingsData.GuestUploadsImage,
+            video: settingsData.GuestUploadsVideo,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
       }
-    } catch (error) {
-      console.error('Error fetching settings:', error);
-    }
-  };
+    };
 
-  fetchSettings();
-}, [userId, albumId]);
-
+    fetchSettings();
+  }, [userId, albumId]);
 
   // Scroll to load more media
   const handleScroll = useCallback(() => {
@@ -64,7 +70,7 @@ useEffect(() => {
         onClick={() => openModal(mediaItem)}
       >
         {isVideo ? (
-          <video className="w-full h-full object-cover" controls>
+          <video className="w-32 h-32 object-cover" controls>
             <source src={fullURL} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -80,29 +86,39 @@ useEffect(() => {
     );
   };
 
+  // Handle file input click
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handle file change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
   return (
     <div className="grid grid-cols-3 gap-1 md:grid-cols-6 h-fit">
-      {/* Media Upload Section for Images */}
-      {(isAdmin || guestUploadsImage) && (
-        <div className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600">
-          <FileValidation
-            handleFileUpload={handleFileUpload}
-            maxImageSizeMB={5}  // Set max size for images (5MB)
-            maxVideoSizeMB={50} // Set max size for videos (50MB)
+      {/* Media Upload Section for Images and Videos */}
+      {(isAdmin || guestUploads.image || guestUploads.video) && (
+        <div 
+          className="relative flex flex-col items-center justify-center w-full max-w-xs cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600 p-4" 
+          onClick={handleUploadClick}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden" // Hide the input
+            accept="image/*,video/*" // Accept images and videos
           />
           {loading && <div style={spinnerStyles} className="spinner" />}
-        </div>
-      )}
-
-      {/* Media Upload Section for Videos */}
-      {(isAdmin || guestUploadsVideo) && (
-        <div className="relative flex flex-col items-center justify-center w-full cursor-pointer aspect-square bg-purple-200 rounded-lg border-2 border-dashed border-purple-600">
-          <FileValidation
-            handleFileUpload={handleFileUpload}
-            maxImageSizeMB={5}  // Set max size for images (5MB)
-            maxVideoSizeMB={50} // Set max size for videos (50MB)
-          />
-          {loading && <div style={spinnerStyles} className="spinner" />}
+          <FaPlus className="text-purple-600 text-4xl" />
+          <div className="mt-2 text-lg text-purple-600 text-center">Upload Media</div>
         </div>
       )}
 

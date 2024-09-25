@@ -24,14 +24,14 @@ const AlbumPage = ({ isGuest }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [GuestUploadsImage, setGuestUploadsImage] = useState(false); 
   const [GuestUploadsVideo, setGuestUploadsVideo] = useState(false); 
-  console.log('User Object:', user);
+
 
   // Fetch album settings, profile picture, and media on page load
   useEffect(() => {
     const fetchAlbumData = async () => {
       try {
         if (userId && albumId) {
-          const settingsResponse = await axios.get(`http://localhost:5000/api/settings/${albumId}/${userId}`, {
+          const settingsResponse = await axios.get(`http://localhost:5000/api/settings/${userId}`, {
             withCredentials: true,
           });
           const settingsData = settingsResponse.data;
@@ -43,8 +43,13 @@ const AlbumPage = ({ isGuest }) => {
           const profilePicResponse = await axios.get(`http://localhost:5000/api/profile-picture/${userId}`, {
             withCredentials: true,
           });
-          setProfilePic(profilePicResponse.data.profilePicUrl);
-
+    
+          if (profilePicResponse.data.profilePicUrl) {
+            setProfilePic(profilePicResponse.data.profilePicUrl);
+          } else {
+            setProfilePic(null); // or a default profile picture
+          }
+    
           const mediaResponse = await axios.get(`http://localhost:5000/api/album-media/${albumId}/${userId}`, {
             withCredentials: true,
           });
@@ -52,11 +57,33 @@ const AlbumPage = ({ isGuest }) => {
         }
       } catch (error) {
         console.error('Error fetching album data:', error);
+        
       }
     };
   
     fetchAlbumData();
   }, [userId, albumId]);
+
+  const handleProfilePicUpload = async (event) => {
+    if (event.target.files.length === 0) return;
+
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('profilePic', file);
+    formData.append('userId', userId);
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/upload-profile-pic', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true,
+      });
+      setProfilePic(response.data.profilePicUrl); // Update the state with the new profile picture URL
+    } catch (error) {
+      console.error('Error uploading profile picture:', error.response?.data || error);
+      setErrorMessage('Error uploading profile picture.');
+    }
+  };
+
 
   const handleMediaUpload = async (file) => {
     console.log('Uploading media for AlbumId:', albumId, 'UserId:', userId);

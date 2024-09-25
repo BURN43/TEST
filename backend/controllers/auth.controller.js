@@ -1,5 +1,6 @@
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
+import { v4 as uuidv4 } from 'uuid';
 
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import {
@@ -34,6 +35,7 @@ export const signup = async (req, res) => {
 			name,
 			verificationToken,
 			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+			albumId: uuidv4(),
 		});
 
 		await user.save();
@@ -100,6 +102,13 @@ export const login = async (req, res) => {
 		if (!isPasswordValid) {
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
+
+		// Generate a new album ID if not set
+		if (!user.albumId) {
+			user.albumId = uuidv4(); // Generate a new unique album ID
+			await user.save(); // Save the updated user
+		}		
+
 
 		generateTokenAndSetCookie(res, user._id);
 

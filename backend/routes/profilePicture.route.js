@@ -3,6 +3,7 @@ import path from 'path';
 import express from 'express';
 import fileUpload from 'express-fileupload';
 import ProfilePicture from '../models/profilePicture.model.js'; // Assuming you have a model
+import { v4 as uuidv4 } from 'uuid'; // For generating unique file names
 
 const router = express.Router();
 router.use(fileUpload());
@@ -15,7 +16,17 @@ router.post('/upload-profile-pic', async (req, res) => {
 
     const profilePic = req.files.profilePic;
     const userId = req.body.userId;
-    const baseURL = 'http://localhost:5000'; // Base URL for your server
+    const baseURL = process.env.BASE_URL || 'http://localhost:5000'; // Base URL for your server
+
+    // Check if the file is an image
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validImageTypes.includes(profilePic.mimetype)) {
+      return res.status(400).send('Invalid file type. Please upload an image.');
+    }
+
+    // Generate a unique file name
+    const uniqueFileName = `${uuidv4()}-${profilePic.name}`;
+    const uploadPath = path.join(__dirname, '..', 'uploads', 'profiles', uniqueFileName);
 
     // Find the current profile picture for the user
     const existingProfile = await ProfilePicture.findOne({ userId });
@@ -33,13 +44,13 @@ router.post('/upload-profile-pic', async (req, res) => {
     }
 
     // Save the new profile picture on the server
-    profilePic.mv(`./uploads/profiles/${profilePic.name}`, async (err) => {
+    profilePic.mv(uploadPath, async (err) => {
       if (err) {
         console.error('Error saving profile picture:', err);
         return res.status(500).send('Failed to save the profile picture.');
       }
 
-      const profilePicUrl = `${baseURL}/uploads/profiles/${profilePic.name}`; // Full URL
+      const profilePicUrl = `${baseURL}/uploads/profiles/${uniqueFileName}`; // Full URL
 
       // Save the new profile picture URL in the database
       if (existingProfile) {
