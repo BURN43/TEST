@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FileValidation = ({ file, handleFileUpload, maxImageSizeMB = 5, maxVideoSizeMB = 50 }) => {
+const FileValidation = ({ file, handleFileUpload, maxImageSizeMB = 15, maxVideoSizeMB = 50 }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const allowedFileTypes = [

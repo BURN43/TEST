@@ -24,6 +24,10 @@ const AlbumPage = ({ isGuest }) => {
   const [GuestUploadsImage, setGuestUploadsImage] = useState(false);
   const [GuestUploadsVideo, setGuestUploadsVideo] = useState(false);
 
+  useEffect(() => {
+    console.log("Loaded Album ID:", albumId);
+  }, [albumId]);
+
   // Fetch album settings, profile picture, and media on page load
   useEffect(() => {
     const fetchAlbumData = async () => {
@@ -89,26 +93,26 @@ const AlbumPage = ({ isGuest }) => {
     const previewUrl = URL.createObjectURL(file);
     const tempMedia = { id: tempId, mediaUrl: previewUrl, title: 'Uploading...' };
     setMedia([tempMedia, ...media]);
-
+  
     const formData = new FormData();
     formData.append('mediaFile', file);
-    formData.append('albumId', albumId || ''); // Allow empty albumId for creation
-    formData.append('userId', userId);
-
+    formData.append('albumId', albumId);  // Ensure albumId is sent from the frontend
+    formData.append('userId', userId);    // Send userId as well
+  
     setLoading(true);
-
+  
     try {
       const response = await axios.post('http://localhost:5000/api/album-media/upload-media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
-
+  
       const newMedia = {
         id: response.data._id,
         mediaUrl: response.data.mediaUrl,
         title: file.name,
       };
-
+  
       setMedia((prevMedia) => prevMedia.map((item) => (item.id === tempId ? newMedia : item)));
     } catch (error) {
       console.error('Error uploading media:', error);
