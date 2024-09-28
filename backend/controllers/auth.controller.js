@@ -1,5 +1,6 @@
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
+import { v4 as uuidv4 } from 'uuid';
 
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import {
@@ -34,6 +35,7 @@ export const signup = async (req, res) => {
 			name,
 			verificationToken,
 			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+			
 		});
 
 		await user.save();
@@ -100,6 +102,9 @@ export const login = async (req, res) => {
 		if (!isPasswordValid) {
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
+
+	
+
 
 		generateTokenAndSetCookie(res, user._id);
 
