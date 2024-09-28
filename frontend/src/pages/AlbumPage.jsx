@@ -23,6 +23,7 @@ const AlbumPage = ({ isGuest }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [GuestUploadsImage, setGuestUploadsImage] = useState(false);
   const [GuestUploadsVideo, setGuestUploadsVideo] = useState(false);
+  
 
 
 
